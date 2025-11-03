@@ -1,37 +1,87 @@
-<script>
-function sendText() {
-  const text = document.getElementById('text').value.trim();
-  if (!text) {
-    alert("Please enter some text first!");
-    return;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Printer Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 40px auto;
+      padding: 20px;
+      max-width: 500px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      margin-top: 12px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #0078d7;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    #status {
+      margin-top: 10px;
+      font-size: 15px;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h2>Printer Command Panel</h2>
+  <input id="text" type="text" placeholder="Enter text to print">
+  <button onclick="sendText()">Send</button>
+  <div id="status"></div>
 
-  // Create a form to submit text
-  const form = document.createElement('form');
-  form.action = 'https://script.google.com/macros/s/AKfycbzZeixziGRy0SoxISJ49VOhudk4XQZgJo77TlBlJQSI91BBEEIeuGk1FPXX5WiYSrGn/exec';
-  form.method = 'GET';
-  form.target = 'hiddenFrame';
+  <script>
+    function sendText() {
+      const text = document.getElementById('text').value.trim();
+      if (!text) {
+        alert("Please enter some text first!");
+        return;
+      }
 
-  const input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = 'text';
-  input.value = text;
-  form.appendChild(input);
+      // Create a form for cross-browser submission
+      const form = document.createElement('form');
+      form.action = 'https://script.google.com/macros/s/AKfycbzZeixziGRy0SoxISJ49VOhudk4XQZgJo77TlBlJQSI91BBEEIeuGk1FPXX5WiYSrGn/exec';
+      form.method = 'GET';
+      form.target = 'hiddenFrame';
 
-  document.body.appendChild(form);
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'text';
+      input.value = text;
+      form.appendChild(input);
 
-  // Hidden frame for submission
-  let iframe = document.getElementById('hiddenFrame');
-  if (!iframe) {
-    iframe = document.createElement('iframe');
-    iframe.name = 'hiddenFrame';
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-  }
+      document.body.appendChild(form);
 
-  form.submit();
-  document.getElementById('status').textContent = '✅ Sent successfully!';
-}
-</script>
+      let iframe = document.getElementById('hiddenFrame');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.name = 'hiddenFrame';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+      }
+
+      form.submit();
+      document.getElementById('status').textContent = '✅ Sent successfully!';
+      document.getElementById('text').value = '';
+    }
+  </script>
+</body>
+</html>
+
 
 
