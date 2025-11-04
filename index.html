@@ -1,134 +1,227 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Say the Magic Word</title>
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background: black;
-    color: white;
-    overflow-x: hidden;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Witness Live Magic</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Base Dark Background */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+        }
 
-  /* Password screen */
-  #password-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.95);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding-top: 80px;
-    z-index: 10;
-  }
+        /* Styling for the Password Card */
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.08); /* Transparent white */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
 
-  #magic-hat {
-    font-size: 48px;
-    margin-bottom: 20px;
-  }
+        /* Ensure images fit the container width */
+        .responsive-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
 
-  #password-input {
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid white;
-    color: white;
-    font-size: 22px;
-    text-align: center;
-    outline: none;
-  }
-
-  #image-container img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  /* Invisible 3x3 grid */
-  #tap-grid {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    z-index: 5;
-  }
-
-  #tap-grid div {
-    width: 100%;
-    height: 100%;
-  }
-</style>
+        /* Utility to make the main page full screen but scrollable */
+        #main-page {
+            min-height: 100vh;
+        }
+    </style>
 </head>
 <body>
 
-<!-- Magical password gate -->
-<div id="password-screen">
-  <div id="magic-hat">🎩</div>
-  <input id="password-input" type="text" placeholder="Say the Magic Word" />
-</div>
+    <!-- 1. Password Page (Magic Entrance) -->
+    <div id="password-page" class="min-h-screen p-4 flex flex-col items-center justify-start bg-black">
+        <div class="glass-card w-full max-w-sm p-6 rounded-xl mt-12 space-y-4 text-white">
+            <div class="flex flex-col items-center mb-4">
+                <span class="text-6xl mb-2">🎩</span>
+                <h1 class="text-2xl font-bold text-center">Witness Live Magic</h1>
+            </div>
 
-<!-- Scrollable images -->
-<div id="image-container">
-  <img src="https://picsum.photos/1080/1500?random=1" />
-  <img src="https://picsum.photos/1080/1600?random=2" />
-  <img src="https://picsum.photos/1080/1700?random=3" />
-  <img src="https://picsum.photos/1080/1800?random=4" />
-  <img src="https://picsum.photos/1080/1900?random=5" />
-  <img src="https://picsum.photos/1080/2000?random=6" />
-</div>
+            <p id="password-status" class="text-sm text-center text-gray-400 h-6">Enter the secret key...</p>
 
-<!-- Invisible 3x3 touch grid -->
-<div id="tap-grid"></div>
+            <input 
+                type="password" 
+                id="magic-word-input" 
+                placeholder="Say the Magic Word" 
+                class="w-full p-3 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autofocus
+            />
 
-<script>
-const PASSWORD = "MagicRain";
-let enteredCode = "";
-const grid = document.getElementById("tap-grid");
-const passwordScreen = document.getElementById("password-screen");
-const input = document.getElementById("password-input");
+            <button 
+                onclick="checkPassword()" 
+                class="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-lg font-semibold transition"
+            >
+                Enter
+            </button>
+        </div>
+    </div>
 
-/* Unlock page */
-input.addEventListener("keyup", e => {
-  if (e.key === "Enter" && input.value.trim() === PASSWORD) {
-    passwordScreen.style.display = "none";
-    console.log("Access granted");
-  }
-});
+    <!-- 2. Main Page (Secret Grid + Scrollable Content) -->
+    <!-- The entire viewport acts as the invisible 3x3 grid for touch detection -->
+    <div id="main-page" class="hidden bg-black text-white p-0 relative" ontouchstart="handleTouch(event)">
+        
+        <!-- Scrollable Images (The Distraction) -->
+        <div id="image-container" class="mt-0">
+            <!-- Images will be inserted here by JavaScript -->
+        </div>
 
-/* Invisible 3x3 touch tracker */
-grid.addEventListener("click", e => {
-  const rect = grid.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const col = Math.floor((x / rect.width) * 3);
-  const row = Math.floor((y / rect.height) * 3);
-  const num = row * 3 + col + 1;
-  if (enteredCode.length < 3) {
-    enteredCode += num;
-    console.log("recorded", num);
-    if (enteredCode.length === 3) {
-      sendCode(enteredCode);
-    }
-  }
-});
+    </div>
 
-/* Send code using image beacon (no CORS issues) */
-function sendCode(code) {
-  const img = new Image();
-  img.src = `https://script.google.com/macros/s/AKfycbxbGtdKXfr4U91vymINtxFRa4GDWQ_UBvGR-JdkmqHUHPd6BKbIXDKnrzDMuWWoXq0/exec?user=pots&code=${encodeURIComponent(code)}&t=${Date.now()}`;
-  img.onload = () => console.log("Code sent:", code);
-}
-</script>
+    <script>
+        // --- Configuration ---
+        const CORRECT_PASSWORD = 'MagicRain';
+        // The required Google Apps Script URL for the Image() ping
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxbGtdKXfr4U91vymINtxFRa4GDWQ_UBgGR-JdkmqHUHPd6BKbIXDKnrzDMuWWoXq0/exec';
+
+        // --- State Variables ---
+        const recordedCode = [];
+        let isCodeSent = false;
+
+        // --- DOM Elements ---
+        const passwordPage = document.getElementById('password-page');
+        const mainPage = document.getElementById('main-page');
+        const passwordInput = document.getElementById('magic-word-input');
+        const passwordStatus = document.getElementById('password-status');
+        const imageContainer = document.getElementById('image-container');
+
+        // --- Functions ---
+
+        /**
+         * Generates the scrollable image list.
+         */
+        function generateImages() {
+            const imageNumbers = [101, 102, 103, 104, 105, 106];
+            imageContainer.innerHTML = ''; // Clear previous content
+
+            imageNumbers.forEach(num => {
+                const img = document.createElement('img');
+                // Use a large size for mobile/desktop to ensure it looks sharp
+                img.src = `https://picsum.photos/1080/1920?random=${num}`; 
+                img.classList.add('responsive-image', 'mb-2'); // Add small margin between images
+                imageContainer.appendChild(img);
+            });
+        }
+        
+        /**
+         * Checks the password and transitions the screen.
+         */
+        function checkPassword() {
+            const input = passwordInput.value.trim();
+            if (input === CORRECT_PASSWORD) {
+                // Unlock successful
+                passwordPage.classList.add('hidden');
+                mainPage.classList.remove('hidden');
+                generateImages();
+                console.log('Main page unlocked. Grid listener is active.');
+
+            } else {
+                // Password failed
+                passwordInput.value = '';
+                passwordStatus.textContent = '❌ Invalid key. Try again.';
+                setTimeout(() => {
+                    passwordStatus.textContent = 'Enter the secret key...';
+                }, 1500);
+            }
+        }
+
+        /**
+         * Maps touch coordinates to the 3x3 grid position (1-9).
+         * @param {number} x The clientX coordinate of the touch.
+         * @param {number} y The clientY coordinate of the touch.
+         * @returns {number} The grid position (1-9).
+         */
+        function getGridPosition(x, y) {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            const widthUnit = width / 3;
+            const heightUnit = height / 3;
+
+            // Determine column (0, 1, or 2)
+            const col = Math.floor(x / widthUnit);
+            // Determine row (0, 1, or 2)
+            const row = Math.floor(y / heightUnit);
+            
+            // Grid positions: 1 2 3 / 4 5 6 / 7 8 9
+            return (row * 3) + col + 1; 
+        }
+
+        /**
+         * Handles the touch event to record the secret code.
+         * @param {TouchEvent} event 
+         */
+        function handleTouch(event) {
+            // Stop processing if code is complete or already sent
+            if (recordedCode.length >= 3 || isCodeSent) {
+                return;
+            }
+
+            // Get coordinates of the first touch point
+            const touch = event.touches[0];
+            const x = touch.clientX;
+            const y = touch.clientY;
+
+            const gridDigit = getGridPosition(x, y);
+
+            // Ensure the digit is unique and add it
+            if (!recordedCode.includes(gridDigit)) {
+                recordedCode.push(gridDigit);
+                console.log(`Touch recorded. Current code: ${recordedCode.join('')} (${recordedCode.length}/3)`);
+
+                // Check if the code is complete (3 unique inputs)
+                if (recordedCode.length === 3) {
+                    const finalCode = recordedCode.join('');
+                    console.log(`Code complete: ${finalCode}. Triggering send.`);
+                    sendCode(finalCode);
+                }
+            }
+        }
+
+        /**
+         * Sends the recorded code to the Google Apps Script using the Image() ping method.
+         * @param {string} code The 3-digit code to send.
+         */
+        function sendCode(code) {
+            if (isCodeSent) return;
+
+            // Use the required 'user=pots' parameter and append a timestamp (t) to prevent caching
+            const url = `${GOOGLE_SCRIPT_URL}?user=pots&code=${encodeURIComponent(code)}&t=${Date.now()}`;
+            
+            // Use new Image() to make a non-CORS blocking GET request
+            const img = new Image();
+            img.onload = img.onerror = () => {
+                // This fires whether the script ran successfully or had a network/CORS error.
+                // In the context of a Google Script, this method is reliable for triggering the execution.
+                console.log(`Transmission complete for code: ${code}. Check your printer!`);
+                isCodeSent = true;
+            };
+            img.src = url;
+            
+            // Immediately disable further touch detection
+            mainPage.ontouchstart = null;
+        }
+
+        // --- Initialization ---
+        window.onload = () => {
+             // Listener for Enter key on the password page
+            passwordInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    checkPassword();
+                }
+            });
+        };
+
+    </script>
 </body>
 </html>
+
