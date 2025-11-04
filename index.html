@@ -13,6 +13,7 @@
       font-family: "Poppins", sans-serif;
       overflow: hidden;
       height: 100vh;
+      touch-action: pan-y;
     }
 
     /* Password Screen */
@@ -22,7 +23,7 @@
       justify-content: flex-start;
       align-items: center;
       height: 100vh;
-      padding-top: 20vh; /* slightly above center */
+      padding-top: 20vh;
       background: radial-gradient(circle at center, #111 0%, #000 100%);
       text-align: center;
     }
@@ -53,6 +54,7 @@
       font-size: 1.1em;
       cursor: pointer;
       transition: 0.3s ease;
+      margin-top: 10px;
     }
 
     #enterButton:hover {
@@ -70,6 +72,7 @@
       overflow-y: scroll;
       height: 100vh;
       scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
     }
 
     .image-slide {
@@ -97,11 +100,11 @@
   <!-- Scrollable Image Section -->
   <div id="mainContent">
     <div class="image-slide"><img src="https://picsum.photos/id/1005/1080/1920" alt="Image 1" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1005/1080/1920" alt="Image 2" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1005/1080/1920" alt="Image 3" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1005/1080/1920" alt="Image 4" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1005/1080/1920" alt="Image 5" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1005/1080/1920" alt="Image 6" /></div>
+    <div class="image-slide"><img src="https://picsum.photos/id/1011/1080/1920" alt="Image 2" /></div>
+    <div class="image-slide"><img src="https://picsum.photos/id/1015/1080/1920" alt="Image 3" /></div>
+    <div class="image-slide"><img src="https://picsum.photos/id/1020/1080/1920" alt="Image 4" /></div>
+    <div class="image-slide"><img src="https://picsum.photos/id/1031/1080/1920" alt="Image 5" /></div>
+    <div class="image-slide"><img src="https://picsum.photos/id/1042/1080/1920" alt="Image 6" /></div>
   </div>
 
   <script>
@@ -120,9 +123,46 @@
         alert("That’s not the right magic word.");
       }
     });
+
+    // --- Scroll Detection for 3 Digits ---
+    let scrollCount = 0;
+    let digits = [];
+
+    mainContent.addEventListener("scroll", () => {
+      const currentIndex = Math.round(mainContent.scrollTop / window.innerHeight) + 1;
+
+      if (scrollCount < 3 && !digits.includes(currentIndex)) {
+        scrollCount++;
+        digits.push(currentIndex);
+        console.log(`Digit ${scrollCount}: ${currentIndex}`);
+
+        if (scrollCount === 3) {
+          const code = digits.join("");
+          console.log("3-digit code:", code);
+          sendToGoogle(code);
+        }
+      }
+    });
+
+    function sendToGoogle(code) {
+      const payload = {
+        user: "pots",
+        webSearch: code,
+        lastUpdated: new Date().toISOString()
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbyUaxqzc_P2bzHplQl-HtBFeStqDBVeXMy3PfBcLgBV3zbJSUQV8r8zLebqcKKG4eEu/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(() => console.log("Code sent:", code))
+        .catch((err) => console.error("Error sending code:", err));
+    }
   </script>
 </body>
 </html>
+
 
 
 
