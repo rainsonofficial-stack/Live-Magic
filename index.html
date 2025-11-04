@@ -1,167 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Magic Live</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Magic</title>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #000;
-      color: white;
-      font-family: "Poppins", sans-serif;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html {
+      height: 100%;
       overflow: hidden;
-      height: 100vh;
-      touch-action: pan-y;
+      background: black;
+      color: white;
+      font-family: 'Poppins', sans-serif;
     }
-
-    /* Password Screen */
-    #passwordScreen {
+    #passwordPage, #scrollPage { 
+      width: 100%; height: 100%; position: absolute; top: 0; left: 0; 
+    }
+    #scrollPage { 
+      display: none; 
+      overflow-y: scroll; 
+      scroll-snap-type: y mandatory;
+    }
+    .image-section {
+      width: 100%;
+      height: 100vh;
+      scroll-snap-align: start;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    .password-box {
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
       align-items: center;
-      height: 100vh;
-      padding-top: 20vh;
-      background: radial-gradient(circle at center, #111 0%, #000 100%);
+      justify-content: flex-start;
+      height: 100%;
+      padding-top: 25vh;
       text-align: center;
     }
-
-    #passwordScreen h2 {
-      font-size: 1.8em;
-      margin-bottom: 25px;
-    }
-
-    #passwordInput {
-      padding: 15px;
-      border-radius: 10px;
+    input {
+      padding: 12px;
+      font-size: 18px;
+      width: 75%;
+      margin-top: 20px;
+      border-radius: 8px;
       border: none;
       outline: none;
-      font-size: 1.1em;
-      text-align: center;
-      width: 80%;
-      max-width: 300px;
-      margin-bottom: 15px;
     }
-
-    #enterButton {
-      padding: 12px 40px;
-      border: none;
-      border-radius: 25px;
-      background: linear-gradient(90deg, #ff0080, #7928ca);
+    button {
+      margin-top: 20px;
+      padding: 12px 25px;
+      font-size: 18px;
+      background: #c0392b;
       color: white;
-      font-size: 1.1em;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
-      transition: 0.3s ease;
-      margin-top: 10px;
     }
-
-    #enterButton:hover {
-      transform: scale(1.05);
-    }
-
-    .icon {
-      font-size: 3em;
-      margin-bottom: 10px;
-    }
-
-    /* Scrollable Image Section */
-    #mainContent {
-      display: none;
-      overflow-y: scroll;
-      height: 100vh;
-      scroll-snap-type: y mandatory;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .image-slide {
-      width: 100%;
-      height: auto;
-      scroll-snap-align: start;
-    }
-
-    .image-slide img {
-      width: 100%;
-      height: auto;
-      display: block;
+    button:hover { background: #e74c3c; }
+    .magic-hat {
+      font-size: 50px;
+      margin-bottom: 15px;
     }
   </style>
 </head>
 <body>
-  <!-- Password Screen -->
-  <div id="passwordScreen">
-    <div class="icon">🎩</div>
-    <h2>Witness Live Magic</h2>
-    <input id="passwordInput" type="password" placeholder="Say the Magic Word" />
-    <button id="enterButton">Enter</button>
+  <div id="passwordPage">
+    <div class="password-box">
+      <div class="magic-hat">🎩</div>
+      <h2>Witness Live Magic</h2>
+      <input id="passwordInput" type="password" placeholder="Say the Magic Word">
+      <button onclick="checkPassword()">Enter</button>
+    </div>
   </div>
 
-  <!-- Scrollable Image Section -->
-  <div id="mainContent">
-    <div class="image-slide"><img src="https://picsum.photos/id/1005/1080/1920" alt="Image 1" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1011/1080/1920" alt="Image 2" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1015/1080/1920" alt="Image 3" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1020/1080/1920" alt="Image 4" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1031/1080/1920" alt="Image 5" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1042/1080/1920" alt="Image 6" /></div>
+  <div id="scrollPage">
+    <!-- You can use fewer than 6 images if you want -->
+    <div class="image-section" style="background-image:url('https://via.placeholder.com/1080x1920?text=Scene+1');"></div>
+    <div class="image-section" style="background-image:url('https://via.placeholder.com/1080x1920?text=Scene+2');"></div>
+    <div class="image-section" style="background-image:url('https://via.placeholder.com/1080x1920?text=Scene+3');"></div>
+    <div class="image-section" style="background-image:url('https://via.placeholder.com/1080x1920?text=Scene+4');"></div>
+    <div class="image-section" style="background-image:url('https://via.placeholder.com/1080x1920?text=Scene+5');"></div>
+    <div class="image-section" style="background-image:url('https://via.placeholder.com/1080x1920?text=Scene+6');"></div>
   </div>
 
   <script>
-    const correctPassword = "MagicRain";
-    const passwordInput = document.getElementById("passwordInput");
-    const enterButton = document.getElementById("enterButton");
-    const passwordScreen = document.getElementById("passwordScreen");
-    const mainContent = document.getElementById("mainContent");
-
-    enterButton.addEventListener("click", () => {
-      if (passwordInput.value === correctPassword) {
-        passwordScreen.style.display = "none";
-        mainContent.style.display = "block";
-        document.body.style.overflow = "hidden";
-      } else {
-        alert("That’s not the right magic word.");
-      }
-    });
-
-    // --- Scroll Detection for 3 Digits ---
+    const PASSWORD = "MagicRain";
     let scrollCount = 0;
     let digits = [];
 
-    mainContent.addEventListener("scroll", () => {
-      const currentIndex = Math.round(mainContent.scrollTop / window.innerHeight) + 1;
+    function checkPassword() {
+      const entered = document.getElementById("passwordInput").value;
+      if (entered === PASSWORD) {
+        document.getElementById("passwordPage").style.display = "none";
+        document.getElementById("scrollPage").style.display = "block";
+      } else {
+        alert("Wrong magic word!");
+      }
+    }
 
-      if (scrollCount < 3 && !digits.includes(currentIndex)) {
+    const scrollPage = document.getElementById("scrollPage");
+
+    scrollPage.addEventListener('scroll', () => {
+      const scrollTop = scrollPage.scrollTop;
+      const pageHeight = window.innerHeight;
+      const currentIndex = Math.floor(scrollTop / pageHeight);
+
+      if (currentIndex + 1 > scrollCount && scrollCount < 3) {
         scrollCount++;
-        digits.push(currentIndex);
-        console.log(`Digit ${scrollCount}: ${currentIndex}`);
+        const digit = (Math.floor(Math.random() * 9) + 1).toString();
+        digits.push(digit);
 
         if (scrollCount === 3) {
-          const code = digits.join("");
-          console.log("3-digit code:", code);
-          sendToGoogle(code);
+          const code = digits.join('');
+          console.log("Sending code:", code);
+          sendToGoogleScript(code);
         }
       }
     });
 
-    function sendToGoogle(code) {
+    function sendToGoogleScript(code) {
+      const url = "https://script.google.com/macros/s/AKfycbweOuJPoHRZ7kylsbBJZHv3gz8i0MeUJbZMQMaIpnQ/dev";
       const payload = {
         user: "pots",
-        webSearch: code,
+        code: code,
         lastUpdated: new Date().toISOString()
       };
 
-      fetch("https://script.google.com/macros/s/AKfycbweOuJPoHRZ7kylsbBJZHv3gz8i0MeUJbZMQMaIpnQ/exec", {
+      fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       })
-        .then(() => console.log("Code sent:", code))
-        .catch((err) => console.error("Error sending code:", err));
+      .then(res => res.text())
+      .then(txt => console.log("Google Script response:", txt))
+      .catch(err => console.error("Error sending data:", err));
     }
   </script>
 </body>
 </html>
+
 
 
 
