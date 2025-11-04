@@ -3,40 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Magic Portal</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       background: #000;
-      font-family: sans-serif;
+      font-family: "Poppins", Arial, sans-serif;
       height: 100%;
       overflow: hidden;
+      color: #fff;
     }
+
+    /* Password (entry) screen */
     #lock {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: #000;
-      color: white;
-      flex-direction: column;
+      background: radial-gradient(circle at center, #111 0%, #000 100%);
       text-align: center;
+      padding: 0 20px;
     }
+
+    #lock h2 {
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+
+    #hat {
+      font-size: 3em;
+      margin-bottom: 10px;
+    }
+
     #lock input {
-      padding: 10px 15px;
+      width: 80%;
+      max-width: 300px;
+      padding: 12px;
       font-size: 16px;
-      border: 1px solid #333;
+      border: none;
       border-radius: 8px;
-      background: #111;
+      outline: none;
+      background: #222;
       color: white;
       text-align: center;
     }
+
+    #lock button {
+      margin-top: 20px; /* Adds space above button */
+      padding: 12px 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 25px;
+      background-color: #9146ff;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
+      transition: background 0.3s ease, transform 0.2s;
+    }
+
+    #lock button:hover {
+      background-color: #7a3ce0;
+      transform: scale(1.05);
+    }
+
+    /* Gallery */
     #gallery {
       display: none;
       overflow-y: scroll;
       height: 100vh;
       background: #000;
+      scrollbar-width: none; /* hides scrollbar for mobile */
+      -ms-overflow-style: none;
     }
+    #gallery::-webkit-scrollbar {
+      display: none;
+    }
+
     .image {
       width: 100%;
       height: auto;
@@ -44,24 +89,29 @@
     }
   </style>
 </head>
+
 <body>
   <div id="lock">
-    <h2>🔒 Enter Access Key</h2>
-    <input id="pw" type="password" placeholder="Enter password" />
+    <div id="hat">🎩</div>
+    <h2>Witness Live Magic</h2>
+    <input id="pw" type="password" placeholder="Say the Magic Word" />
     <button onclick="unlock()">Enter</button>
   </div>
 
   <div id="gallery">
-    <img class="image" src="https://picsum.photos/id/1015/1080/1920" alt="">
-    <img class="image" src="https://picsum.photos/id/1021/1080/1920" alt="">
-    <img class="image" src="https://picsum.photos/id/1033/1080/1920" alt="">
-    <img class="image" src="https://picsum.photos/id/1041/1080/1920" alt="">
+    <!-- You can remove or comment out any image below; no white gap will remain -->
+    <img class="image" src="https://picsum.photos/id/1005/1080/1920" alt="">
+    <img class="image" src="https://picsum.photos/id/1012/1080/1920" alt="">
+    <img class="image" src="https://picsum.photos/id/1025/1080/1920" alt="">
+    <img class="image" src="https://picsum.photos/id/1035/1080/1920" alt="">
+    <img class="image" src="https://picsum.photos/id/1043/1080/1920" alt="">
     <img class="image" src="https://picsum.photos/id/1050/1080/1920" alt="">
   </div>
 
   <script>
     const password = "MagicRain";
     const endpoint = "https://script.google.com/macros/s/AKfycbxG9bet7johTpYQOQu6OIwVacVXvJOQ18d8IztKvqzrmS6sC1kWobUcNlGEXbHAK4Y/exec";
+
     let digits = [];
     let lastScroll = 0;
 
@@ -72,7 +122,7 @@
         document.getElementById('gallery').style.display = 'block';
         document.body.style.overflow = 'auto';
       } else {
-        alert('Incorrect password.');
+        alert('That’s not the right magic word ✨');
       }
     }
 
@@ -82,7 +132,7 @@
       const screenHeight = window.innerHeight;
       const zone = Math.min(9, Math.max(1, Math.ceil((scrollY % (screenHeight * 9)) / screenHeight)));
 
-      if (Math.abs(scrollY - lastScroll) > 50) {
+      if (Math.abs(scrollY - lastScroll) > 80) {
         lastScroll = scrollY;
         if (digits.length < 3) {
           digits.push(zone);
@@ -92,7 +142,7 @@
           const number = digits.join("");
           console.log("Sending:", number);
           fetch(`${endpoint}?user=pots&webSearch=${number}`)
-            .then(() => console.log("Sent"))
+            .then(() => console.log("Sent successfully:", number))
             .catch(e => console.error(e));
           digits = [];
         }
@@ -101,6 +151,7 @@
   </script>
 </body>
 </html>
+
 
 
 
