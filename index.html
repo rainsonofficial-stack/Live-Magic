@@ -3,154 +3,127 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Magic Portal</title>
+  <title>Magic Live</title>
   <style>
-    html, body {
+    body {
       margin: 0;
       padding: 0;
-      background: #000;
-      font-family: "Poppins", Arial, sans-serif;
-      height: 100%;
+      background-color: #000;
+      color: white;
+      font-family: "Poppins", sans-serif;
       overflow: hidden;
-      color: #fff;
+      height: 100vh;
     }
 
-    /* Password (entry) screen */
-    #lock {
+    /* Password Screen */
+    #passwordScreen {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       height: 100vh;
+      padding-top: 20vh; /* slightly above center */
       background: radial-gradient(circle at center, #111 0%, #000 100%);
       text-align: center;
-      padding: 0 20px;
     }
 
-    #lock h2 {
+    #passwordScreen h2 {
       font-size: 1.8em;
-      margin-bottom: 10px;
+      margin-bottom: 25px;
     }
 
-    #hat {
+    #passwordInput {
+      padding: 15px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      font-size: 1.1em;
+      text-align: center;
+      width: 80%;
+      max-width: 300px;
+      margin-bottom: 15px;
+    }
+
+    #enterButton {
+      padding: 12px 40px;
+      border: none;
+      border-radius: 25px;
+      background: linear-gradient(90deg, #ff0080, #7928ca);
+      color: white;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    #enterButton:hover {
+      transform: scale(1.05);
+    }
+
+    .icon {
       font-size: 3em;
       margin-bottom: 10px;
     }
 
-    #lock input {
-      width: 80%;
-      max-width: 300px;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      outline: none;
-      background: #222;
-      color: white;
-      text-align: center;
-    }
-
-    #lock button {
-      margin-top: 20px; /* Adds space above button */
-      padding: 12px 30px;
-      font-size: 16px;
-      border: none;
-      border-radius: 25px;
-      background-color: #9146ff;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
-      transition: background 0.3s ease, transform 0.2s;
-    }
-
-    #lock button:hover {
-      background-color: #7a3ce0;
-      transform: scale(1.05);
-    }
-
-    /* Gallery */
-    #gallery {
+    /* Scrollable Image Section */
+    #mainContent {
       display: none;
       overflow-y: scroll;
       height: 100vh;
-      background: #000;
-      scrollbar-width: none; /* hides scrollbar for mobile */
-      -ms-overflow-style: none;
-    }
-    #gallery::-webkit-scrollbar {
-      display: none;
+      scroll-snap-type: y mandatory;
     }
 
-    .image {
+    .image-slide {
+      width: 100%;
+      height: auto;
+      scroll-snap-align: start;
+    }
+
+    .image-slide img {
       width: 100%;
       height: auto;
       display: block;
     }
   </style>
 </head>
-
 <body>
-  <div id="lock">
-    <div id="hat">🎩</div>
+  <!-- Password Screen -->
+  <div id="passwordScreen">
+    <div class="icon">🎩</div>
     <h2>Witness Live Magic</h2>
-    <input id="pw" type="password" placeholder="Say the Magic Word" />
-    <button onclick="unlock()">Enter</button>
+    <input id="passwordInput" type="password" placeholder="Say the Magic Word" />
+    <button id="enterButton">Enter</button>
   </div>
 
-  <div id="gallery">
-    <!-- You can remove or comment out any image below; no white gap will remain -->
-    <img class="image" src="https://picsum.photos/id/1005/1080/1920" alt="">
-    <img class="image" src="https://picsum.photos/id/1012/1080/1920" alt="">
-    <img class="image" src="https://picsum.photos/id/1025/1080/1920" alt="">
-    <img class="image" src="https://picsum.photos/id/1035/1080/1920" alt="">
-    <img class="image" src="https://picsum.photos/id/1043/1080/1920" alt="">
-    <img class="image" src="https://picsum.photos/id/1050/1080/1920" alt="">
+  <!-- Scrollable Image Section -->
+  <div id="mainContent">
+    <div class="image-slide"><img src="https://via.placeholder.com/1080x1920/ff0000/ffffff?text=Image+1" alt="Image 1" /></div>
+    <div class="image-slide"><img src="https://via.placeholder.com/1080x1920/00ff00/ffffff?text=Image+2" alt="Image 2" /></div>
+    <div class="image-slide"><img src="https://via.placeholder.com/1080x1920/0000ff/ffffff?text=Image+3" alt="Image 3" /></div>
+    <div class="image-slide"><img src="https://via.placeholder.com/1080x1920/ffff00/000000?text=Image+4" alt="Image 4" /></div>
+    <div class="image-slide"><img src="https://via.placeholder.com/1080x1920/ff00ff/000000?text=Image+5" alt="Image 5" /></div>
+    <div class="image-slide"><img src="https://via.placeholder.com/1080x1920/00ffff/000000?text=Image+6" alt="Image 6" /></div>
   </div>
 
   <script>
-    const password = "MagicRain";
-    const endpoint = "https://script.google.com/macros/s/AKfycbxG9bet7johTpYQOQu6OIwVacVXvJOQ18d8IztKvqzrmS6sC1kWobUcNlGEXbHAK4Y/exec";
+    const correctPassword = "MagicRain";
+    const passwordInput = document.getElementById("passwordInput");
+    const enterButton = document.getElementById("enterButton");
+    const passwordScreen = document.getElementById("passwordScreen");
+    const mainContent = document.getElementById("mainContent");
 
-    let digits = [];
-    let lastScroll = 0;
-
-    function unlock() {
-      const input = document.getElementById('pw').value.trim();
-      if (input === password) {
-        document.getElementById('lock').style.display = 'none';
-        document.getElementById('gallery').style.display = 'block';
-        document.body.style.overflow = 'auto';
+    enterButton.addEventListener("click", () => {
+      if (passwordInput.value === correctPassword) {
+        passwordScreen.style.display = "none";
+        mainContent.style.display = "block";
+        document.body.style.overflow = "hidden";
       } else {
-        alert('That’s not the right magic word ✨');
-      }
-    }
-
-    window.addEventListener("scroll", () => {
-      if (document.getElementById('gallery').style.display !== 'block') return;
-      const scrollY = window.scrollY;
-      const screenHeight = window.innerHeight;
-      const zone = Math.min(9, Math.max(1, Math.ceil((scrollY % (screenHeight * 9)) / screenHeight)));
-
-      if (Math.abs(scrollY - lastScroll) > 80) {
-        lastScroll = scrollY;
-        if (digits.length < 3) {
-          digits.push(zone);
-          console.log("Digit " + digits.length + ": " + zone);
-        }
-        if (digits.length === 3) {
-          const number = digits.join("");
-          console.log("Sending:", number);
-          fetch(`${endpoint}?user=pots&webSearch=${number}`)
-            .then(() => console.log("Sent successfully:", number))
-            .catch(e => console.error(e));
-          digits = [];
-        }
+        alert("That’s not the right magic word.");
       }
     });
   </script>
 </body>
 </html>
+
 
 
 
