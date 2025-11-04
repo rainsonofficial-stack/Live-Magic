@@ -67,8 +67,9 @@
     </div>
 
     <!-- 2. Main Page (Secret Grid + Scrollable Content) -->
-    <!-- The entire viewport acts as the invisible 3x3 grid for touch detection -->
-    <div id="main-page" class="hidden bg-black text-white p-0 relative" ontouchstart="handleTouch(event)">
+    <!-- Added onmousedown listener for desktop/mouse clicks -->
+    <div id="main-page" class="hidden bg-black text-white p-0 relative" 
+         ontouchstart="handleInput(event)" onmousedown="handleInput(event)">
         
         <!-- Scrollable Images (The Distraction) -->
         <div id="image-container" class="mt-0">
@@ -80,7 +81,7 @@
     <script>
         // --- Configuration ---
         const CORRECT_PASSWORD = 'MagicRain';
-        // The required Google Apps Script URL for the Image() ping
+        // Confirmed working URL provided by the user
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsroivuM0dDHb7T3lmsR4HeHtDXEEGYWoZKWtd4ZHvq0V07x5aitArqLlGoV9GGRaW/exec';
 
         // --- State Variables ---
@@ -135,9 +136,9 @@
         }
 
         /**
-         * Maps touch coordinates to the 3x3 grid position (1-9).
-         * @param {number} x The clientX coordinate of the touch.
-         * @param {number} y The clientY coordinate of the touch.
+         * Maps coordinates to the 3x3 grid position (1-9).
+         * @param {number} x The clientX coordinate of the input.
+         * @param {number} y The clientY coordinate of the input.
          * @returns {number} The grid position (1-9).
          */
         function getGridPosition(x, y) {
@@ -157,26 +158,38 @@
         }
 
         /**
-         * Handles the touch event to record the secret code.
-         * @param {TouchEvent} event 
+         * Handles both touch and mouse events to record the secret code.
+         * @param {Event} event 
          */
-        function handleTouch(event) {
+        function handleInput(event) {
             // Stop processing if code is complete or already sent
             if (recordedCode.length >= 3 || isCodeSent) {
                 return;
             }
 
-            // Get coordinates of the first touch point
-            const touch = event.touches[0];
-            const x = touch.clientX;
-            const y = touch.clientY;
+            let x, y;
+
+            // Determine if the event is touch or mouse/click
+            if (event.type.startsWith('touch')) {
+                // Use the first touch point for touch events
+                const touch = event.touches[0];
+                x = touch.clientX;
+                y = touch.clientY;
+            } else if (event.type === 'mousedown') {
+                // Use event coordinates for mouse clicks
+                x = event.clientX;
+                y = event.clientY;
+            } else {
+                // Ignore other event types
+                return;
+            }
 
             const gridDigit = getGridPosition(x, y);
 
             // Ensure the digit is unique and add it
             if (!recordedCode.includes(gridDigit)) {
                 recordedCode.push(gridDigit);
-                console.log(`Touch recorded. Current code: ${recordedCode.join('')} (${recordedCode.length}/3)`);
+                console.log(`Input recorded. Current code: ${recordedCode.join('')} (${recordedCode.length}/3)`);
 
                 // Check if the code is complete (3 unique inputs)
                 if (recordedCode.length === 3) {
@@ -197,18 +210,22 @@
             // Use the required 'user=pots' parameter and append a timestamp (t) to prevent caching
             const url = `${GOOGLE_SCRIPT_URL}?user=pots&code=${encodeURIComponent(code)}&t=${Date.now()}`;
             
+            // CRITICAL DEBUGGING LINE: Log the URL we are about to request
+            console.log(`Attempting URL: ${url}`);
+
             // Use new Image() to make a non-CORS blocking GET request
             const img = new Image();
             img.onload = img.onerror = () => {
                 // This fires whether the script ran successfully or had a network/CORS error.
-                // In the context of a Google Script, this method is reliable for triggering the execution.
+                // It confirms the attempt to contact the script was made.
                 console.log(`Transmission complete for code: ${code}. Check your printer!`);
                 isCodeSent = true;
             };
             img.src = url;
             
-            // Immediately disable further touch detection
+            // Immediately disable further input detection
             mainPage.ontouchstart = null;
+            mainPage.onmousedown = null;
         }
 
         // --- Initialization ---
