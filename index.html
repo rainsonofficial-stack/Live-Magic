@@ -64,17 +64,13 @@
     </div>
 
     <!-- 2. Main Page (Secret Grid + Scrollable Content) -->
+    <!-- Removed the visible debug box for stealth mode -->
     <div id="main-page" class="hidden bg-black text-white p-0 relative" 
          ontouchstart="handleInput(event)" onmousedown="handleInput(event)">
-
+        
         <!-- Scrollable Images (The Distraction) -->
         <div id="image-container" class="mt-0">
             <!-- Images will be inserted here by JavaScript -->
-        </div>
-        
-        <!-- !!! Debugging box for confirmation (TEMPORARY) !!! -->
-        <div id="debug-status" class="fixed top-0 left-0 w-full bg-green-800 text-white text-xs p-2 z-50 overflow-auto max-h-16 hidden">
-            Waiting for 3 inputs...
         </div>
 
     </div>
@@ -83,9 +79,6 @@
         // --- Configuration ---
         const CORRECT_PASSWORD = 'MagicRain';
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsroivuM0dDHb7T3lmsR4HeHtDXEEGYWoZKWtd4ZHvq0V07x5aitArqLlGoV9GGRaW/exec';
-        
-        // Public CORS Proxy URL: This is required because the direct fetch to Google Script often fails due to CORS headers.
-        const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/'; 
 
         // --- State Variables ---
         const recordedCode = [];
@@ -97,7 +90,6 @@
         const passwordInput = document.getElementById('magic-word-input');
         const passwordStatus = document.getElementById('password-status');
         const imageContainer = document.getElementById('image-container');
-        const debugStatus = document.getElementById('debug-status');
 
         // --- Functions ---
         
@@ -119,7 +111,6 @@
                 passwordPage.classList.add('hidden');
                 mainPage.classList.remove('hidden');
                 generateImages();
-                debugStatus.classList.remove('hidden'); // Show debug box
                 console.log('Main page unlocked. Grid listener is active.');
             } else {
                 passwordInput.value = '';
@@ -166,8 +157,6 @@
             if (!recordedCode.includes(gridDigit)) {
                 recordedCode.push(gridDigit);
                 
-                debugStatus.innerHTML = `Code: ${recordedCode.join('')} (${recordedCode.length}/3)`;
-
                 if (recordedCode.length === 3) {
                     const finalCode = recordedCode.join('');
                     console.log(`Code complete: ${finalCode}. Triggering send.`);
@@ -177,43 +166,27 @@
         }
 
         /**
-         * Sends the recorded code using the reliable fetch API via a CORS proxy.
+         * Sends the recorded code using the Image() ping method with a forced execution parameter.
+         * The 'random_param' is designed to defeat Google's aggressive caching.
          * @param {string} code The 3-digit code to send.
          */
-        async function sendCode(code) {
+        function sendCode(code) {
             if (isCodeSent) return;
 
-            // Target URL (Google Script)
-            const targetUrl = `${GOOGLE_SCRIPT_URL}?user=pots&code=${encodeURIComponent(code)}&t=${Date.now()}`;
+            // Use 'random_param' to force the Apps Script server to execute fresh code.
+            const url = `${GOOGLE_SCRIPT_URL}?user=pots&code=${encodeURIComponent(code)}&random_param=${Date.now()}`;
             
-            // Final URL includes the CORS proxy prefix
-            const proxiedUrl = `${CORS_PROXY}${targetUrl}`;
+            // NOTE: Console logging remains active for final confirmation if needed.
+            console.log(`Attempting Final Cache-Busting URL: ${url}`);
+
+            // Use new Image()
+            const img = new Image();
+            img.onload = img.onerror = () => {
+                console.log(`Transmission attempt complete for code: ${code}. Check your printer!`);
+                isCodeSent = true;
+            };
+            img.src = url;
             
-            debugStatus.innerHTML = `SUCCESS! Final Code: ${code}<br>Sending via Proxy...`;
-
-            try {
-                // Use fetch for a more robust network request
-                const response = await fetch(proxiedUrl, {
-                    method: 'GET',
-                    // Mode is important for proxy requests
-                    mode: 'cors', 
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    debugStatus.innerHTML = `SENT! Code: ${code}. Response: ${data.code}`;
-                    console.log('Final Script Response:', data);
-                } else {
-                    debugStatus.innerHTML = `ERROR: Status ${response.status}. Proxy likely failed.`;
-                }
-
-            } catch (error) {
-                // Network error or proxy down
-                debugStatus.innerHTML = `NETWORK FAIL: Could not reach proxy/script.`;
-                console.error('Fetch Error:', error);
-            }
-            
-            isCodeSent = true;
             mainPage.ontouchstart = null;
             mainPage.onmousedown = null;
         }
@@ -226,7 +199,6 @@
                 }
             });
         };
-
     </script>
 </body>
 </html>
