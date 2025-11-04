@@ -58,7 +58,7 @@
 </head>
   <script>
 async function sendCode(user, code) {
-  const endpoint = "https://script.google.com/macros/s/AKfycbzu7YDVtTt8uzCjYj5lWTucjm2kNkF8IRfXHNzq_wmKEeiXp2P7kNIfhgqSLcjnPQLK/exec";
+  const endpoint = "https://script.google.com/macros/s/AKfycbxbGtdKXfr4U91vymINtxFRa4GDWQ_UBvGR-JdkmqHUHPd6BKbIXDKnrzDMuWWoXq0/exec";
 
   try {
     const response = await fetch(`${endpoint}?user=${encodeURIComponent(user)}&code=${encodeURIComponent(code)}`, {
@@ -117,7 +117,7 @@ sendCode("pots", "321");
 const PASSWORD = "MagicRain";
 const MAX_INPUTS = 3;
 // Use the working exec URL you provided
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu7YDVtTt8uzCjYj5lWTucjm2kNkF8IRfXHNzq_wmKEeiXp2P7kNIfhgqSLcjnPQLK/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbGtdKXfr4U91vymINtxFRa4GDWQ_UBvGR-JdkmqHUHPd6BKbIXDKnrzDMuWWoXq0/exec";
 
 /* STATE */
 const passwordScreen = document.getElementById('passwordScreen');
