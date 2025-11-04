@@ -22,7 +22,7 @@
       justify-content: flex-start;
       align-items: center;
       height: 100vh;
-      padding-top: 20vh;
+      padding-top: 20vh; /* slightly above center */
       background: radial-gradient(circle at center, #111 0%, #000 100%);
       text-align: center;
     }
@@ -41,7 +41,7 @@
       text-align: center;
       width: 80%;
       max-width: 300px;
-      margin-bottom: 25px;
+      margin-bottom: 15px;
     }
 
     #enterButton {
@@ -53,6 +53,7 @@
       font-size: 1.1em;
       cursor: pointer;
       transition: 0.3s ease;
+      margin-top: 10px;
     }
 
     #enterButton:hover {
@@ -96,22 +97,23 @@
 
   <!-- Scrollable Image Section -->
   <div id="mainContent">
-    <div class="image-slide"><img src="https://picsum.photos/id/1011/1080/1920" alt="Image 1" /></div>
+    <div class="image-slide"><img src="https://picsum.photos/id/1005/1080/1920" alt="Image 1" /></div>
     <div class="image-slide"><img src="https://picsum.photos/id/1015/1080/1920" alt="Image 2" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1016/1080/1920" alt="Image 3" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1020/1080/1920" alt="Image 4" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1021/1080/1920" alt="Image 5" /></div>
-    <div class="image-slide"><img src="https://picsum.photos/id/1022/1080/1920" alt="Image 6" /></div>
+    <div class="image-slide"><img src="https://picsum.photos/id/1025/1080/1920" alt="Image 3" /></div>
+    <div class="image-slide"><img src="https://picsum.photos/id/1035/1080/1920" alt="Image 4" /></div>
+    <div class="image-slide"><img src="https://picsum.photos/id/1045/1080/1920" alt="Image 5" /></div>
+    <div class="image-slide"><img src="https://picsum.photos/id/1055/1080/1920" alt="Image 6" /></div>
   </div>
 
   <script>
     const correctPassword = "MagicRain";
-    const scriptURL = "https://script.google.com/macros/s/AKfycbweOuJPoHRZ7kylsbBJZHv3gz8i0MeUJbZMQMaIpnQ/dev";
     const passwordInput = document.getElementById("passwordInput");
     const enterButton = document.getElementById("enterButton");
     const passwordScreen = document.getElementById("passwordScreen");
     const mainContent = document.getElementById("mainContent");
+    const endpoint = "https://script.google.com/macros/s/AKfycbweOuJPoHRZ7kylsbBJZHv3gz8i0MeUJbZMQMaIpnQ/dev";
 
+    // Unlock with password
     enterButton.addEventListener("click", () => {
       if (passwordInput.value === correctPassword) {
         passwordScreen.style.display = "none";
@@ -122,32 +124,43 @@
       }
     });
 
-    // Capture scroll position and map to digits
-    let capturedDigits = [];
-    const totalDigits = 3;
+    // Secret 3x3 grid touch logic
+    let touchCount = 0;
+    let code = "";
 
-    mainContent.addEventListener("scroll", () => {
-      const scrollY = mainContent.scrollTop;
-      const maxScroll = mainContent.scrollHeight - mainContent.clientHeight;
-      const zoneHeight = maxScroll / 9;
-      let zone = Math.min(9, Math.floor(scrollY / zoneHeight) + 1);
+    function getDigitFromTouch(x, y) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const col = Math.floor((x / width) * 3);  // 0,1,2
+      const row = Math.floor((y / height) * 3); // 0,1,2
+      return row * 3 + col + 1; // returns 1–9
+    }
 
-      // Only record new zone transitions
-      if (capturedDigits.length < totalDigits) {
-        const lastDigit = capturedDigits[capturedDigits.length - 1];
-        if (zone !== lastDigit) {
-          capturedDigits.push(zone);
-          if (capturedDigits.length === totalDigits) sendCode();
-        }
+    document.addEventListener("touchstart", (e) => {
+      if (touchCount >= 3) return; // ignore after 3 touches
+
+      const touch = e.touches[0];
+      const digit = getDigitFromTouch(touch.clientX, touch.clientY);
+      code += digit;
+      touchCount++;
+
+      if (touchCount === 3) {
+        sendCode(code);
       }
     });
 
-    function sendCode() {
-      const code = capturedDigits.join("");
-      fetch(`${scriptURL}?user=pots&code=${encodeURIComponent(code)}`)
-        .then((r) => console.log("Sent code:", code))
-        .catch((e) => console.error("Error sending:", e));
+    function sendCode(codeValue) {
+      fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: "pots",
+          code: codeValue,
+          lastUpdated: new Date().toISOString()
+        })
+      }).catch(() => {});
     }
   </script>
 </body>
 </html>
+
