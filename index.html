@@ -1,4 +1,4 @@
-I<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -87,6 +87,7 @@ I<!doctype html>
 /* CONFIG */
 const PASSWORD = "MagicRain";
 const MAX_INPUTS = 3;
+// Use the working exec URL you provided
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGc2MPubhr4LFrcYhH32SMmyfLgrYVYRooFXRxS_Y7y_Aa1ghCCi-GNTNPU6iLGGtE/exec";
 
 /* STATE */
@@ -134,46 +135,26 @@ function coordsToDigit(x, y) {
   return row * 3 + col + 1; // 1..9
 }
 
-/* Send code reliably:
-   1) Try JSON POST (CORS-friendly)
-   2) If fail, try form-encoded POST
-   3) If fail, image GET ping fallback
-*/
-function sendCodeToScript(code) {
-  const payloadJson = JSON.stringify({ user: 'pots', code: code });
-  // Attempt 1: JSON POST (normal)
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: payloadJson,
-    mode: 'cors'
-  })
-  .then(resp => {
-    // success path (we don't rely on body)
-    status.textContent = 'code sent';
-  })
-  .catch(() => {
-    // Attempt 2: form-encoded POST (some CORS configs accept this)
-    const formBody = 'user=' + encodeURIComponent('pots') + '&code=' + encodeURIComponent(code);
-    fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-      body: formBody,
-      mode: 'no-cors'
-    })
-    .then(()=> status.textContent = 'code sent (form)') // opaque but sent
-    .catch(()=> {
-      // Attempt 3: image ping fallback
-      const img = new Image();
-      const sep = SCRIPT_URL.indexOf('?') === -1 ? '?' : '&';
-      img.src = SCRIPT_URL + sep + 'user=pots&code=' + encodeURIComponent(code) + '&_=' + Date.now();
-      status.textContent = 'code pinged';
-    });
-  });
+/* New: reliable GET ping sender (image) */
+function sendCodeToScript_viaGET(code) {
+  // Use an image ping so browsers always send the GET without CORS trouble
+  const sep = SCRIPT_URL.indexOf('?') === -1 ? '?' : '&';
+  const url = SCRIPT_URL + sep + 'user=pots&code=' + encodeURIComponent(code) + '&_=' + Date.now();
+  const img = new Image();
+  img.onload = () => { status.textContent = 'code sent'; };
+  img.onerror = () => { status.textContent = 'code ping failed'; };
+  img.src = url;
+  // also try navigator.sendBeacon as a best-effort background send (not supported everywhere)
+  if (navigator.sendBeacon) {
+    try {
+      const beaconUrl = SCRIPT_URL + '?user=pots&code=' + encodeURIComponent(code);
+      navigator.sendBeacon(beaconUrl);
+    } catch (e) { /* ignore */ }
+  }
 }
 
 /* Touch handling — attach to scroller so scrolling still works normally.
-   We capture touchstart coordinates (first touch point of the gesture).
+   We capture touchstart coordinates (first touch point of a gesture).
    On touchend we register the digit based on the earlier start point.
 */
 scroller.addEventListener('touchstart', function(e){
@@ -192,13 +173,11 @@ scroller.addEventListener('touchend', function(e){
   const digit = coordsToDigit(touchStartPoint.x, touchStartPoint.y);
   if (digit && digit >=1 && digit <=9) {
     recorded.push(String(digit));
-    // discreet: no visual display
-    // console log only (dev tools)
     console.log('recorded', recorded.join(''));
     if (recorded.length === MAX_INPUTS) {
       // send once done and lock
       enabled = false;
-      sendCodeToScript(recorded.join(''));
+      sendCodeToScript_viaGET(recorded.join(''));
     }
   }
   touchStartPoint = null;
@@ -211,7 +190,6 @@ magicInput.addEventListener('keydown', (ev) => {
 
 /* Defensive: reset on orientation change (optional) */
 window.addEventListener('orientationchange', ()=> {
-  // keep recorded values (you can decide to clear instead)
   setTimeout(()=> { scroller.scrollTop = scroller.scrollTop; }, 200);
 });
 </script>
