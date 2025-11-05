@@ -116,7 +116,6 @@
             width: 100%;
             height: 100%;
             z-index: 50; 
-            /* CRITICAL FIX: The overlay must ignore events to let scrolling pass to image-container */
             pointer-events: none; 
         }
     </style>
@@ -210,8 +209,15 @@
             // Only capture taps after password entry
             if (document.getElementById('password-screen').style.display !== 'none') return;
             
-            // Check if this event originated from a different element (like a button in the future)
-            if (event.target.id !== 'image-container') return;
+            // This is CRITICAL for touch scrolling: If it's a touch start event, prevent default behavior 
+            // to stop the browser from immediately treating it as a drag/scroll.
+            if (event.type === 'touchstart') {
+                 event.preventDefault();
+            }
+            
+            // Check if this event originated from the image container
+            if (event.target.id !== 'image-container' && event.target.className !== 'magic-image') return;
+
 
             // Determine coordinates based on event type
             const interaction = event.touches ? event.touches[0] : event;
@@ -233,6 +239,7 @@
                     const finalCode = recordedCode.join('');
                     // --- AUTO-SEND THE CODE ---
                     sendCode(finalCode);
+                    console.log(`[Magic Log] Code collected: ${finalCode}`);
                 }
             }
         }
@@ -241,10 +248,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             const imageContainer = document.getElementById('image-container');
             
-            // FIX: Attach listeners ONLY to the image container. 
-            // The image-container is scrollable, but taps on it will trigger the event.
-            imageContainer.addEventListener('click', handleInteraction, { passive: true });
-            imageContainer.addEventListener('touchstart', handleInteraction, { passive: true });
+            // Attach listeners to the image container
+            // passive: false is required when using preventDefault()
+            imageContainer.addEventListener('click', handleInteraction, { passive: false });
+            imageContainer.addEventListener('touchstart', handleInteraction, { passive: false });
             
             document.getElementById('magic-word').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') checkPassword();
