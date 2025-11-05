@@ -204,22 +204,19 @@
             codeSent = true; 
         }
 
-        // --- REVISED EVENT HANDLER FOR CLICK/TAP ---
+        // --- PRIMARY EVENT HANDLER: Use touchstart to capture position immediately ---
         function handleInteraction(event) {
             // Only capture taps after password entry
             if (document.getElementById('password-screen').style.display !== 'none') return;
             
-            // This is CRITICAL for touch scrolling: If it's a touch start event, prevent default behavior 
-            // to stop the browser from immediately treating it as a drag/scroll.
-            if (event.type === 'touchstart') {
-                 event.preventDefault();
-            }
-            
-            // Check if this event originated from the image container
+            // Check if this event originated from the target area
             if (event.target.id !== 'image-container' && event.target.className !== 'magic-image') return;
+            
+            // Critical: Only process touchstart event for code collection
+            if (event.type === 'click' && event.button !== 0) return; // Prevent right-click from triggering
+            if (event.type === 'touchstart' && event.touches.length > 1) return; // Ignore multi-touch
 
-
-            // Determine coordinates based on event type
+            // Determine coordinates based on event type (using first touch for touchstart)
             const interaction = event.touches ? event.touches[0] : event;
             const x = interaction.clientX;
             const y = interaction.clientY;
@@ -248,10 +245,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             const imageContainer = document.getElementById('image-container');
             
-            // Attach listeners to the image container
-            // passive: false is required when using preventDefault()
-            imageContainer.addEventListener('click', handleInteraction, { passive: false });
-            imageContainer.addEventListener('touchstart', handleInteraction, { passive: false });
+            // Attach touchstart (for priority tap) and click (for desktop) listeners
+            imageContainer.addEventListener('touchstart', handleInteraction, { passive: true });
+            imageContainer.addEventListener('click', handleInteraction, { passive: true });
             
             document.getElementById('magic-word').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') checkPassword();
