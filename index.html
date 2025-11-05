@@ -4,257 +4,263 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Witness Live Magic</title>
-    <!-- Load Tailwind CSS -->
+    <!-- Tailwind CSS for styling and responsiveness -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Base Dark Background */
+        /* General Setup */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #000000;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden; /* Prevent horizontal scroll on mobile */
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            touch-action: pan-y; /* Allow vertical scrolling */
+            background-color: #0d1117; 
+            color: #c9d1d9;
+            /* Prevents double-tap zoom on touch devices */
+            touch-action: manipulation; 
         }
 
-        /* Styling for the Password Card */
-        .glass-card {
-            background-color: rgba(255, 255, 255, 0.08); /* Transparent white */
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        }
+        /* -------------------------------------- */
+        /* Stealth Page (The Trick View) Elements */
+        /* -------------------------------------- */
 
-        /* Ensure images fit the container width */
-        .responsive-image {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        /* Set the main page to cover the viewport for touch calculation */
-        #main-page {
+        /* The container for the 6 scrolling images */
+        #image-content {
             min-height: 100vh;
+            /* Allows content (images) to be scrolled */
+        }
+        
+        /* The invisible grid that covers the entire screen */
+        #tap-grid-overlay {
+            position: fixed; /* Stays fixed regardless of scrolling */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            z-index: 100; /* Ensures it sits on top of all images */
+            opacity: 0; /* CRITICAL: Makes the input grid completely invisible */
+        }
+        .grid-cell {
+            /* Large, full-screen touch targets */
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        /* -------------------------------------- */
+        /* Password Page (The Bluff View) Elements */
+        /* -------------------------------------- */
+        #password-page {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. Password Page (Magic Entrance) -->
-    <div id="password-page" class="min-h-screen p-4 flex flex-col items-center justify-start bg-black">
-        <div class="glass-card w-full max-w-sm p-6 rounded-xl mt-12 space-y-4 text-white">
-            <div class="flex flex-col items-center mb-4">
-                <span class="text-6xl mb-2">🎩</span>
-                <h1 class="text-2xl font-bold text-center">Witness Live Magic</h1>
+    <!-- STAGE 1: PASSWORD PAGE (The Bluff) -->
+    <div id="password-page" class="p-6">
+        <h1 class="text-4xl font-extrabold text-[#58a6ff] mb-4">WITNESS LIVE MAGIC</h1>
+        <p class="text-xl text-gray-400 mb-8">Say the Magic Word...</p>
+        
+        <input 
+            type="password" 
+            id="passwordInput" 
+            placeholder="Enter Magic Word"
+            class="w-full max-w-sm p-3 mb-4 text-lg text-white bg-[#161b22] border border-[#30363d] rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-lg"
+        >
+        <button 
+            id="executeButton" 
+            class="w-full max-w-sm p-3 text-lg font-semibold bg-green-600 hover:bg-green-700 rounded-lg shadow-xl transition duration-150 ease-in-out"
+        >
+            Execute
+        </button>
+        <p id="passwordStatus" class="mt-4 text-red-400 h-6"></p>
+    </div>
+
+    <!-- STAGE 2: STEALTH PAGE (The Input) -->
+    <div id="stealth-page" class="hidden">
+        
+        <!-- Spectator Distraction Content (6 Scrollable Images) -->
+        <div id="image-content" class="p-4">
+            <h2 class="text-2xl font-bold text-center mb-6 text-[#c9d1d9] sticky top-0 bg-[#0d1117] pt-4 pb-2 z-50">Concentrate on the Prediction Grid</h2>
+            
+            <p id="statusMessage" class="text-center text-sm font-medium mb-4 h-6 text-yellow-500"></p>
+
+            <!-- Placeholder Images (Using placeholder service for reliability) -->
+            <div class="space-y-4">
+                <img src="https://placehold.co/600x400/30363d/c9d1d9?text=Image+1" alt="Placeholder 1" class="w-full h-auto rounded-lg shadow-md">
+                <img src="https://placehold.co/600x400/30363d/c9d1d9?text=Image+2" alt="Placeholder 2" class="w-full h-auto rounded-lg shadow-md">
+                <img src="https://placehold.co/600x400/30363d/c9d1d9?text=Image+3" alt="Placeholder 3" class="w-full h-auto rounded-lg shadow-md">
+                <img src="https://placehold.co/600x400/30363d/c9d1d9?text=Image+4" alt="Placeholder 4" class="w-full h-auto rounded-lg shadow-md">
+                <img src="https://placehold.co/600x400/30363d/c9d1d9?text=Image+5" alt="Placeholder 5" class="w-full h-auto rounded-lg shadow-md">
+                <img src="https://placehold.co/600x400/30363d/c9d1d9?text=Image+6" alt="Placeholder 6" class="w-full h-auto rounded-lg shadow-md">
             </div>
-
-            <p id="password-status" class="text-sm text-center text-gray-400 h-6">Enter the secret key...</p>
-
-            <input 
-                type="password" 
-                id="magic-word-input" 
-                placeholder="Say the Magic Word" 
-                class="w-full p-3 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                autofocus
-            />
-
-            <button 
-                onclick="checkPassword()" 
-                class="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-lg font-semibold transition"
-            >
-                Enter
-            </button>
-        </div>
-    </div>
-
-    <!-- 2. Main Page (Secret Grid + Scrollable Content) -->
-    <!-- The entire viewport acts as the invisible 3x3 grid for touch detection -->
-    <div id="main-page" 
-         class="hidden bg-black text-white p-0 relative" 
-         ontouchstart="handleInput(event)" 
-         onmousedown="handleInput(event)">
-        
-        <!-- Discreet Debug Confirmation (Hidden from audience) -->
-        <div id="status-box" class="fixed top-0 left-0 w-full p-2 text-center text-sm font-semibold transition-opacity duration-500 bg-green-900 text-green-300 opacity-0 z-50">
-            Prediction Sent
+            <div class="h-20"></div> <!-- Footer spacing -->
         </div>
 
-        <!-- Scrollable Images (The Distraction) -->
-        <div id="image-container" class="mt-0">
-            <!-- Images will be inserted here by JavaScript -->
+        <!-- INVISIBLE INPUT GRID OVERLAY -->
+        <div id="tap-grid-overlay">
+            <div class="grid-cell" data-value="1"></div>
+            <div class="grid-cell" data-value="2"></div>
+            <div class="grid-cell" data-value="3"></div>
+            <div class="grid-cell" data-value="4"></div>
+            <div class="grid-cell" data-value="5"></div>
+            <div class="grid-cell" data-value="6"></div>
+            <div class="grid-cell" data-value="7"></div>
+            <div class="grid-cell" data-value="8"></div>
+            <div class="grid-cell" data-value="9"></div>
         </div>
 
     </div>
 
-    <script>
-        // --- Configuration ---
-        const CORRECT_PASSWORD = 'MagicRain';
+<script>
+    // --- CONFIGURATION ---
+    // !!! CRITICAL: REPLACE THIS WITH YOUR NEW GLITCH/REPLIT SERVER URL !!!
+    const API_ENDPOINT_URL = 'YOUR_NEW_GLITCH_OR_REPLIT_URL'; 
+    const MAX_CODE_LENGTH = 4;
+    const CORRECT_PASSWORD = '6018'; // The magic word to unlock the system
+
+    // --- STATE ---
+    let tapSequence = [];
+    let currentState = 'PASSWORD_REQUIRED'; // PASSWORD_REQUIRED, CODE_MODE, CODE_SENT_LOCKED
+
+    // --- DOM ELEMENTS ---
+    const passwordPage = document.getElementById('password-page');
+    const stealthPage = document.getElementById('stealth-page');
+    const passwordInput = document.getElementById('passwordInput');
+    const executeButton = document.getElementById('executeButton');
+    const passwordStatus = document.getElementById('passwordStatus');
+    const tapGrid = document.getElementById('tap-grid-overlay');
+    const statusMessage = document.getElementById('statusMessage');
+
+    // --- LOGIC ---
+
+    function handlePasswordCheck() {
+        if (passwordInput.value === CORRECT_PASSWORD) {
+            // Password correct: Transition to the stealth page
+            currentState = 'CODE_MODE';
+            passwordPage.classList.add('hidden');
+            stealthPage.classList.remove('hidden');
+            passwordStatus.textContent = '';
+            updateStatus('READY_FOR_CODE');
+        } else {
+            // Password incorrect
+            passwordStatus.textContent = "Incorrect. Try again.";
+            passwordInput.value = '';
+        }
+    }
+
+    function handleTap(event) {
+        // Prevent default browser behavior (like scrolling/zooming)
+        event.preventDefault(); 
         
-        // *********************************************************************************
-        // !!! CRITICAL: REPLACE THIS PLACEHOLDER WITH YOUR UNIQUE PIPEDREAM WEBHOOK URL !!!
-        // *********************************************************************************
-        const API_ENDPOINT_URL = 'https://eo20s6tx0l11e01.m.pipedream.net'; 
-
-        // --- State Variables ---
-        const recordedCode = [];
-        let isCodeSent = false;
-        let isProcessing = false; 
-
-        // --- DOM Elements ---
-        const passwordPage = document.getElementById('password-page');
-        const mainPage = document.getElementById('main-page');
-        const passwordInput = document.getElementById('magic-word-input');
-        const passwordStatus = document.getElementById('password-status');
-        const imageContainer = document.getElementById('image-container');
-        const statusBox = document.getElementById('status-box');
-
-
-        // --- Functions ---
-
-        function generateImages() {
-            const timestamp = Date.now(); 
-            const imageNumbers = [1, 2, 3, 4, 5, 6].map(i => 100 + i); 
-
-            imageContainer.innerHTML = ''; 
-
-            imageNumbers.forEach(num => {
-                const img = document.createElement('img');
-                img.src = `https://picsum.photos/1080/1920?random=${num}&t=${timestamp}`; 
-                img.classList.add('responsive-image', 'mb-2');
-                imageContainer.appendChild(img);
-            });
-        }
+        const cell = event.target.closest('.grid-cell');
+        if (!cell) return;
         
-        function checkPassword() {
-            const input = passwordInput.value.trim();
-            if (input === CORRECT_PASSWORD) {
-                passwordPage.classList.add('hidden');
-                mainPage.classList.remove('hidden');
-                generateImages();
-                console.log('Main page unlocked. Input listener is active.');
+        const value = parseInt(cell.getAttribute('data-value'));
 
-            } else {
-                passwordInput.value = '';
-                passwordStatus.textContent = '❌ Invalid key. Try again.';
-                setTimeout(() => {
-                    passwordStatus.textContent = 'Enter the secret key...';
-                }, 1500);
-            }
+        // 1. Check if we are in the input phase
+        if (currentState !== 'CODE_MODE') {
+            // Ignore all taps if not in the code entry phase or if locked
+            return;
         }
 
-        function getCoordinates(event) {
-            if (event.touches && event.touches.length > 0) {
-                return { x: event.touches[0].clientX, y: event.touches[0].clientY };
-            } else if (event instanceof MouseEvent) {
-                return { x: event.clientX, y: event.clientY };
-            }
-            return null;
-        }
-
-        function getGridPosition(x, y) {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-
-            const widthUnit = width / 3;
-            const heightUnit = height / 3;
-
-            const col = Math.floor(x / widthUnit);
-            const row = Math.floor(y / heightUnit);
+        // 2. Input Logic
+        if (tapSequence.length < MAX_CODE_LENGTH) {
+            tapSequence.push(value);
+            updateStatus('ENTERING_CODE');
             
-            return (row * 3) + col + 1; 
-        }
-
-        function handleInput(event) {
-            if (recordedCode.length >= 3 || isCodeSent) {
-                return;
-            }
-
-            const coords = getCoordinates(event);
-            if (!coords) return;
-
-            const gridDigit = getGridPosition(coords.x, coords.y);
-
-            if (!recordedCode.includes(gridDigit)) {
-                recordedCode.push(gridDigit);
-                console.log(`Touch recorded. Current code: ${recordedCode.join('')} (${recordedCode.length}/3)`);
-
-                if (recordedCode.length === 3) {
-                    const finalCode = recordedCode.join('');
-                    console.log(`Code complete: ${finalCode}. Triggering Pipedream POST.`);
-                    sendCode(finalCode);
-                }
-            }
-        }
-
-        /**
-         * Sends the recorded code to the Pipedream webhook via POST.
-         * @param {string} code The 3-digit code to send.
-         */
-        function sendCode(code) {
-            if (isCodeSent || isProcessing) return;
-            isProcessing = true;
-            
-            if (API_ENDPOINT_URL.includes('YOUR_PIPEDREAM_HTTP_ENDPOINT_HERE')) {
-                 console.error("CRITICAL: You must update the API_ENDPOINT_URL constant with your Pipedream webhook URL.");
-                 statusBox.textContent = "ERROR: URL Not Set!";
-                 statusBox.classList.remove('opacity-0');
-                 isProcessing = false;
-                 return;
-            }
-
-            const payload = {
-                user: "pots",
-                code: code,
-                timestamp: new Date().toISOString()
-            };
-
-            fetch(API_ENDPOINT_URL, {
-                method: 'POST',
-                // Pipedream is CORS-friendly, so we don't need 'no-cors' here, making it more reliable.
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => {
-                isCodeSent = true;
-                isProcessing = false;
+            // 3. Instant Send on 4th tap
+            if (tapSequence.length === MAX_CODE_LENGTH) {
+                sendCode(tapSequence.join(''));
                 
-                // Show confirmation message
-                statusBox.textContent = `CODE SENT: ${code}`;
-                statusBox.classList.remove('opacity-0');
-                setTimeout(() => {
-                    statusBox.classList.add('opacity-0');
-                }, 4000);
-
-                // Disable further input
-                mainPage.ontouchstart = null;
-                mainPage.onmousedown = null;
-
-                console.log(`POST to Pipedream successful. Status: ${response.status}`);
-            })
-            .catch(error => {
-                console.error('Network error during POST request:', error);
-                statusBox.textContent = `ERROR: Network failed. Code: ${code}`;
-                statusBox.classList.remove('opacity-0');
-                isProcessing = false;
-            });
+                // CRITICAL FIX: Lock the system permanently after sending
+                currentState = 'CODE_SENT_LOCKED';
+                updateStatus('LOCK');
+            }
         }
+    }
 
-        // --- Initialization ---
-        window.onload = () => {
-            passwordInput.addEventListener('keypress', (event) => {
-                if (event.key === 'Enter') {
-                    checkPassword();
-                }
-            });
+    // --- COMMUNICATION ---
+
+    async function sendCode(code) {
+        updateStatus('SENDING');
+        
+        const paddedCode = code.padStart(MAX_CODE_LENGTH, '0');
+
+        const payload = {
+            user: "N/A", 
+            code: paddedCode,
         };
 
-    </script>
+        try {
+            const response = await fetch(API_ENDPOINT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.status === 204 || response.ok) {
+                updateStatus('SUCCESS', paddedCode);
+            } else {
+                updateStatus('ERROR');
+            }
+        } catch (error) {
+            console.error('Network or communication error:', error);
+            updateStatus('ERROR');
+        }
+    }
+
+    // --- UI/STATUS MANAGEMENT ---
+
+    function updateStatus(mode) {
+        const tapCount = tapSequence.length;
+        statusMessage.classList.remove('text-green-500', 'text-red-500', 'text-yellow-500');
+
+        if (mode === 'READY_FOR_CODE') {
+            statusMessage.textContent = "Prediction Phase Activated. Enter 4 digits.";
+            statusMessage.classList.add('text-green-500');
+            
+        } else if (mode === 'ENTERING_CODE') {
+            const remaining = MAX_CODE_LENGTH - tapCount;
+            statusMessage.textContent = `Inputting code... ${remaining} taps remaining.`;
+            statusMessage.classList.add('text-green-500');
+
+        } else if (mode === 'SENDING') {
+            statusMessage.textContent = "Transmitting code to server...";
+            statusMessage.classList.add('text-yellow-500');
+            
+        } else if (mode === 'SUCCESS') {
+            statusMessage.textContent = "CODE TRANSMITTED. Prediction set.";
+            statusMessage.classList.add('text-green-500');
+
+        } else if (mode === 'LOCK') {
+            statusMessage.textContent = "Prediction set. System Locked.";
+            statusMessage.classList.add('text-yellow-500');
+            
+        } else if (mode === 'ERROR') {
+            statusMessage.textContent = "TRANSMISSION FAILED. Check server connection.";
+            statusMessage.classList.add('text-red-500');
+        }
+    }
+
+    // --- INITIALIZATION ---
+
+    // Password Page Events
+    executeButton.addEventListener('click', handlePasswordCheck);
+    passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handlePasswordCheck();
+    });
+
+    // Stealth Page Events (Taps on the invisible grid)
+    tapGrid.addEventListener('click', handleTap);
+    tapGrid.addEventListener('touchstart', (e) => handleTap(e)); // Ensure touch works on mobile
+
+</script>
+
 </body>
 </html>
-
