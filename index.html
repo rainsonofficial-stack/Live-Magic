@@ -7,13 +7,27 @@
     <!-- Tailwind CSS for styling and responsiveness -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* General Setup */
+        /* General Setup: Ensure content starts at the top, not centered */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0d1117; 
             color: #c9d1d9;
-            /* Prevents double-tap zoom on touch devices */
             touch-action: manipulation; 
+            /* REMOVED: height: 100vh; display: flex; justify-content: center; align-items: center; */
+            min-height: 100vh; /* Ensure body takes up full height for scrolling */
+        }
+
+        /* -------------------------------------- */
+        /* Password Page (The Bluff View) Elements */
+        /* -------------------------------------- */
+        #password-page {
+            /* Now top-aligned with padding, not centered */
+            min-height: 100vh; 
+            padding-top: 5rem; /* Space from the top */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center horizontally */
+            text-align: center;
         }
 
         /* -------------------------------------- */
@@ -22,13 +36,12 @@
 
         /* The container for the 6 scrolling images */
         #image-content {
-            min-height: 100vh;
-            /* Allows content (images) to be scrolled */
+            padding: 1rem;
         }
         
         /* The invisible grid that covers the entire screen */
         #tap-grid-overlay {
-            position: fixed; /* Stays fixed regardless of scrolling */
+            position: fixed; 
             top: 0;
             left: 0;
             width: 100vw;
@@ -36,33 +49,30 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 2px;
-            z-index: 100; /* Ensures it sits on top of all images */
+            z-index: 100; 
             opacity: 0; /* CRITICAL: Makes the input grid completely invisible */
         }
         .grid-cell {
-            /* Large, full-screen touch targets */
             width: 100%;
             height: 100%;
             cursor: pointer;
         }
-
-        /* -------------------------------------- */
-        /* Password Page (The Bluff View) Elements */
-        /* -------------------------------------- */
-        #password-page {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            text-align: center;
+        
+        .sticky-header {
+             /* Ensures the header stays visible while images scroll */
+            position: sticky;
+            top: 0;
+            background-color: #0d1117; 
+            padding-top: 1rem;
+            padding-bottom: 0.5rem;
+            z-index: 50; 
         }
     </style>
 </head>
 <body>
 
     <!-- STAGE 1: PASSWORD PAGE (The Bluff) -->
-    <div id="password-page" class="p-6">
+    <div id="password-page" class="p-4">
         <h1 class="text-4xl font-extrabold text-[#58a6ff] mb-4">WITNESS LIVE MAGIC</h1>
         <p class="text-xl text-gray-400 mb-8">Say the Magic Word...</p>
         
@@ -82,16 +92,17 @@
     </div>
 
     <!-- STAGE 2: STEALTH PAGE (The Input) -->
-    <div id="stealth-page" class="hidden">
+    <div id="stealth-page" class="hidden min-h-screen">
         
         <!-- Spectator Distraction Content (6 Scrollable Images) -->
-        <div id="image-content" class="p-4">
-            <h2 class="text-2xl font-bold text-center mb-6 text-[#c9d1d9] sticky top-0 bg-[#0d1117] pt-4 pb-2 z-50">Concentrate on the Prediction Grid</h2>
+        <div id="image-content">
+            <div class="sticky-header">
+                <h2 class="text-2xl font-bold text-center text-[#c9d1d9]">Concentrate on the Prediction Grid</h2>
+                <p id="statusMessage" class="text-center text-sm font-medium h-6 text-yellow-500 mt-2"></p>
+            </div>
             
-            <p id="statusMessage" class="text-center text-sm font-medium mb-4 h-6 text-yellow-500"></p>
-
             <!-- Placeholder Images (Using placeholder service for reliability) -->
-            <div class="space-y-4">
+            <div class="space-y-4 pt-4">
                 <img src="https://placehold.co/600x400/30363d/c9d1d9?text=Image+1" alt="Placeholder 1" class="w-full h-auto rounded-lg shadow-md">
                 <img src="https://placehold.co/600x400/30363d/c9d1d9?text=Image+2" alt="Placeholder 2" class="w-full h-auto rounded-lg shadow-md">
                 <img src="https://placehold.co/600x400/30363d/c9d1d9?text=Image+3" alt="Placeholder 3" class="w-full h-auto rounded-lg shadow-md">
@@ -104,6 +115,7 @@
 
         <!-- INVISIBLE INPUT GRID OVERLAY -->
         <div id="tap-grid-overlay">
+            <!-- Data values 1 through 9 are defined here -->
             <div class="grid-cell" data-value="1"></div>
             <div class="grid-cell" data-value="2"></div>
             <div class="grid-cell" data-value="3"></div>
@@ -119,14 +131,13 @@
 
 <script>
     // --- CONFIGURATION ---
-    // !!! CRITICAL: REPLACE THIS WITH YOUR NEW GLITCH/REPLIT SERVER URL !!!
     const API_ENDPOINT_URL = 'YOUR_NEW_GLITCH_OR_REPLIT_URL'; 
     const MAX_CODE_LENGTH = 4;
-    const CORRECT_PASSWORD = '6018'; // The magic word to unlock the system
+    const CORRECT_PASSWORD = '6018'; 
 
     // --- STATE ---
     let tapSequence = [];
-    let currentState = 'PASSWORD_REQUIRED'; // PASSWORD_REQUIRED, CODE_MODE, CODE_SENT_LOCKED
+    let currentState = 'PASSWORD_REQUIRED'; // CODE_MODE, CODE_SENT_LOCKED
 
     // --- DOM ELEMENTS ---
     const passwordPage = document.getElementById('password-page');
@@ -149,7 +160,7 @@
             updateStatus('READY_FOR_CODE');
         } else {
             // Password incorrect
-            passwordStatus.textContent = "Incorrect. Try again.";
+            passwordStatus.textContent = "Incorrect Magic Word.";
             passwordInput.value = '';
         }
     }
@@ -163,9 +174,8 @@
         
         const value = parseInt(cell.getAttribute('data-value'));
 
-        // 1. Check if we are in the input phase
+        // 1. Check if we are in the input phase and not locked
         if (currentState !== 'CODE_MODE') {
-            // Ignore all taps if not in the code entry phase or if locked
             return;
         }
 
@@ -205,7 +215,7 @@
             });
 
             if (response.status === 204 || response.ok) {
-                updateStatus('SUCCESS', paddedCode);
+                updateStatus('SUCCESS');
             } else {
                 updateStatus('ERROR');
             }
