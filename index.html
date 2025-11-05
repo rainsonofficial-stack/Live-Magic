@@ -95,7 +95,6 @@
             overflow: hidden;
         }
         
-        /* This container is responsible for scrolling */
         .image-container {
             width: 100%;
             height: 100vh;
@@ -118,6 +117,28 @@
             height: 100%;
             z-index: 50; 
             pointer-events: none; 
+        }
+        
+        /* DIAGNOSTIC PANEL STYLES */
+        #diagnostic-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            text-align: center;
+            z-index: 60;
+            color: #fff;
+        }
+        #send-button {
+            padding: 10px 20px;
+            background: red; /* Make it obvious! */
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 5px;
         }
     </style>
     
@@ -143,13 +164,18 @@
             <img src="https://picsum.photos/1080/1920?random=106" class="magic-image" alt="Random Image 6">
             <img src="https://picsum.photos/1080/1920?random=107" class="magic-image" alt="Random Image 7">
         </div>
+        
         <div id="secret-grid-overlay"></div>
     </div>
-
+    
+    <div id="diagnostic-panel" style="display:none;">
+        <p>Current Code: <span id="current-code-display">0000</span> (Tap 4 areas)</p>
+        <button id="send-button" onclick="manualSend()">SEND CODE NOW</button>
+    </div>
+    
     <script>
         // --- Configuration ---
         const CORRECT_PASSWORD = '6018'; 
-        // YOUR WEB APP URL (This is now used directly)
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzsroivuM0dDHb7T3lmsR4HeHtDXEEGYWoZKWtd4ZHvq0V07x5aitArqLlGoV9GGRaW/exec';
 
         // --- State Variables ---
@@ -157,6 +183,9 @@
         const MAX_CODE_LENGTH = 4;
         let recordingActive = false;
         let codeSent = false;
+        
+        const codeDisplay = document.getElementById('current-code-display');
+        const diagnosticPanel = document.getElementById('diagnostic-panel');
 
         // --- Core Functions ---
         function checkPassword() {
@@ -165,9 +194,22 @@
             if (input === CORRECT_PASSWORD) {
                 document.getElementById('password-screen').style.display = 'none';
                 document.getElementById('main-page').style.display = 'block';
+                diagnosticPanel.style.display = 'block'; // Show the panel
                 recordingActive = true; 
             } else {
                 errorMsg.textContent = 'Incorrect word. Try again.';
+            }
+        }
+        
+        // TEMPORARY MANUAL SEND FUNCTION
+        function manualSend() {
+            const finalCode = recordedCode.join('');
+            if (finalCode.length === MAX_CODE_LENGTH) {
+                sendCode(finalCode);
+                document.getElementById('send-button').textContent = 'Code Sent!';
+                document.getElementById('send-button').disabled = true;
+            } else {
+                alert("Please tap exactly 4 areas first.");
             }
         }
 
@@ -178,18 +220,17 @@
             return (row - 1) * 3 + col;
         }
 
-        // NEW METHOD: Uses fetch (a standard browser API) to send data
+        // Uses fetch (standard browser API) to send data
         function sendCode(code) {
             if (codeSent) return;
             
             console.log(`[Magic Log] Attempting to send code: ${code}`);
 
-            // Data format expected by the Google Script's doPost function
             const dataToSend = { code: code };
 
             fetch(WEB_APP_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Critical for GitHub Pages to avoid CORS issues
+                mode: 'no-cors', 
                 cache: 'no-cache',
                 headers: {
                     'Content-Type': 'application/json',
@@ -197,12 +238,9 @@
                 body: JSON.stringify(dataToSend)
             })
             .then(response => {
-                // Since we use 'no-cors', we can't read the response body, 
-                // but if fetch succeeds without network error, it's generally good.
-                console.log("[Magic Log] Fetch complete. Check Google Script logs for update status.");
+                console.log("[Magic Log] Fetch complete. Check Google Script logs.");
             })
             .catch((error) => {
-                // This logs a network error (like bad URL or connectivity issues)
                 console.error('[Magic Log] Network Fetch Error:', error);
             });
 
@@ -220,18 +258,20 @@
             
             if (!recordedCode.includes(cellStr)) {
                 recordedCode.push(cellStr);
+                codeDisplay.textContent = recordedCode.join(''); // Update the display
                 
                 if (recordedCode.length === MAX_CODE_LENGTH) {
                     recordingActive = false;
-                    const finalCode = recordedCode.join('');
-                    sendCode(finalCode);
+                    // Auto-send is removed for manual button test, but the code is ready
+                    console.log(`[Magic Log] Code collected: ${recordedCode.join('')}`);
+                    document.getElementById('send-button').style.backgroundColor = 'green';
+                    document.getElementById('send-button').textContent = 'CODE READY! CLICK TO SEND';
                 }
             }
         }
         
         // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Attach listener to the overlay, which now allows scrolling to pass through
             const gridOverlay = document.getElementById('secret-grid-overlay');
             gridOverlay.addEventListener('touchstart', handleTouch, { passive: true });
             
